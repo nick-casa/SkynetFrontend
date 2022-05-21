@@ -1,3 +1,4 @@
+
 // Import react components
 import { useState, useEffect} from 'react';
 
@@ -27,7 +28,7 @@ function App() {
   /*****/
   // On initial run, start initialization of MySky
   useEffect(() => {
-
+    
   }, []);
 
   // Connecting Wallet to Frontend
@@ -57,6 +58,7 @@ function App() {
     }
   }
   
+  /* Sending Coins */
   const handleSendAlgo = async (event) => {
     event.preventDefault();
     console.log('begin send attempt');
@@ -161,7 +163,55 @@ function App() {
     setLoading(false);      
    
   }
+
+  /* Checking Wallet Balance */
+  const getAlgoBalance = async (event) => {
+    const algosdk = require('algosdk');
+    const baseServer = 'https://testnet-algorand.api.purestake.io/idx2'
+    const port = '';
+    const token = {
+        'X-API-Key': 'BjPgZDZX4T3ZjlUzyEl7H9ZYK5TtZbyq72ua1r63'
+    };
+    
+    const indexerClient = new algosdk.Indexer(token, baseServer, port);
+    
+    let address = "JTCQW5TV5OY5HIX6O7ER5LKIC74UJYU2ORYDRHYXRGGVOJJK4ALDUZSMXI";
+    let response = await indexerClient.lookupAccountAssets(address).do();
+    let algAmount;
+    response.assets.forEach((asset) => {
+      if(asset['asset-id']===90650110){
+        algAmount = asset['amount'] * 10**-8
+        //console.log(algAmount)
+      }
+    })
+    window.document.getElementById('algoWallet').innerText = "Algorand Wallet: " + String(algAmount).substring(0,8) + " ALGO";
+    return algAmount;
+
+  }
+  getAlgoBalance();
+  setInterval(getAlgoBalance, 1000);
+  const getEthBalance = async (event) => {
+    const Web3 = require('web3');
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/e8dcbee341124f3884d296c775de27fa"))
+    
+    let tokenAddress = "0xc778417E063141139Fce010982780140Aa0cD5Ab";
+    let walletAddress = "0x7F36B39c2e1bCc4Ec135832e21eCF082A6EC7e77";
+
+    // The minimum ABI to get ERC20 Token balance
+    let minABI = [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"guy","type":"address"},{"name":"wad","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"dst","type":"address"},{"name":"wad","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"wad","type":"uint256"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"dst","type":"address"},{"name":"wad","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"deposit","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"src","type":"address"},{"indexed":true,"name":"guy","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"src","type":"address"},{"indexed":true,"name":"dst","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"dst","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Deposit","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"src","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Withdrawal","type":"event"}];
+    let contract = new web3.eth.Contract(minABI,tokenAddress);
+    let balance = await contract.methods.balanceOf(walletAddress).call();
+    //console.log(web3.utils.fromWei(balance, "ether") + " ETH");
+    //console.log(balance);
+    window.document.getElementById('ethWallet').innerText = "Wrapped Ethereum Wallet: " + web3.utils.fromWei(balance, "ether") + " wETH";
+   
+        
+  }
+  getEthBalance();
+  setInterval(getEthBalance, 10000);
   
+
+
   return (
     <Container>
     <Container
@@ -189,16 +239,32 @@ function App() {
     <Container
       style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}
     >
-     
+      
+     <Header
+        as="p"
+        id="algoWallet"
+        content="Algorand Wallet: "
+        style={{ marginTop: '2em', marginBottom: '2em' }}
+      >
+      </Header>
+      <Header
+        as="p"
+        id="ethWallet"
+        content="Wrapped Ethereum Wallet: "
+        style={{ marginTop: '2em', marginBottom: '2em' }}
+      >
+      </Header>
+    </Container>
+
     <Button
         onClick={handleSendAlgo}
         style={{color:'white',backgroundColor: 'steelblue', height:'50px', margin:'auto 0'}}
-    > Stake Algo </Button>
+    > Convert ALGO to wETH </Button>
+
     <Button
         onClick={handleSendWeth}
-        style={{color:'white',backgroundColor: 'steelblue', height:'50px', margin:'auto 0'}}
+        style={{marginLeft:'10px',color:'white',backgroundColor: 'steelblue', height:'50px'}}
     > Stake wETH </Button>
-    </Container>
     </Container>
   );
 }
