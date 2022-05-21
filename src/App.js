@@ -2,7 +2,7 @@
 import { useState, useEffect} from 'react';
 
 // Import UI Components
-import { Header, Container, Button } from 'semantic-ui-react';
+import { Header, Container, Button, Input } from 'semantic-ui-react';
 
 // Import the SkynetClient and a helper
 // import { SkynetClient } from 'skynet-js';
@@ -19,11 +19,12 @@ import { Header, Container, Button } from 'semantic-ui-react';
 function App() {
   // Define app state helpers
   const [loading, setLoading] = useState(false);
-  
+  const [loggedIn, setLoggedIn] = useState(false);
   // choose a data domain for saving files in MySky
   //const dataDomain = 'localhost';
 
   /*****/
+
   // On initial run, start initialization of MySky
   useEffect(() => {
     
@@ -48,10 +49,12 @@ function App() {
           window.document.getElementById("account").innerText = "Account: " + 
           accountData[0].address.substring(0,4)+" ... "+accountData[0].address.substring(accountData[0].address.length-4);
           sessionStorage.setItem('address',accountData[0].address);
+          setLoggedIn(true);
         })
       .catch((e) => {
           // handle errors and perform error cleanup here
           console.error(e);
+          setLoggedIn(false);
       });
     }
   }
@@ -100,7 +103,6 @@ function App() {
     }).then((d) =>{
       console.log("send successful")
       console.log(d);
-
     })
     .catch((e) => {
         console.error(e);
@@ -108,10 +110,10 @@ function App() {
     setLoading(false);      
    
   }
+
   const handleSendWeth = async (event) => {
     event.preventDefault();
     console.log('begin send attempt');
-    setLoading(true);
     
     const algosdk = require('algosdk');
     const baseServer = 'https://testnet-algorand.api.purestake.io/ps2'
@@ -122,44 +124,58 @@ function App() {
     
     const algodclient = new algosdk.Algodv2(token, baseServer, port);
     
-    let params = await algodclient.getTransactionParams().do();
-      
-    const receiver = "2RTLJ5YR6YNF4KBZ6SSYFSQLRGXDORU5JV7VRQ6P52MOHQVGL4NFT3IPBQ";
+    const algoMneu = "picture captain teach casual matter bonus minimum body gold dolphin material dish describe picnic range quick feed swing toilet jaguar whisper admit pupil abstract predict";
+    const dethAccount = algosdk.mnemonicToSecretKey(algoMneu);
+
+    let params = await algodclient.getTransactionParams().do();  
+    const receiver = "FXAHTSPWE3LR4JDEE5RUCZF2LF44VBVXVFC3UUQGDZQEQVIZW4PHJ7QDXA";
     const enc = new TextEncoder();
-    const note = enc.encode("Hello World");
-    let amount = 5; // equals 1 ALGO
-    let assetId = 90650110;
+    const note = enc.encode("Depositing wETH");
+    let amount = parseFloat(window.document.getElementById('wethIn').value)*10**8; 
+    let wethID = 90650110;
+    let dethID = 91208285;
     
-    let txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-        assetIndex: assetId,
+    let txn1 = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        assetIndex: wethID,
         from: sessionStorage.getItem('address'), 
         to: receiver, 
         amount: amount, 
         note: note, 
-        type:  'axfer',  // ASA Configuration (acfg)
+        type:  'axfer',  // ASA Transfer
         suggestedParams: params
     });
-
-    // Use the AlgoSigner encoding library to make the transactions base64
-    let txn_b64 = window.AlgoSigner.encoding.msgpackToBase64(txn.toByte());
-
-    let txnID = await window.AlgoSigner.signTxn([{txn: txn_b64}]);
     
-    console.log(txnID[0].blob);
+    let txn1_b64 = window.AlgoSigner.encoding.msgpackToBase64(txn1.toByte());
+    let signedTx1 = await window.AlgoSigner.signTxn([{txn: txn1_b64}]);     
     
     window.AlgoSigner.send({
       ledger: 'TestNet',
-      tx: txnID[0].blob // the unique blob representing the signed transaction
+      tx: signedTx1[0].blob // the unique blob representing the signed transaction
     }).then((d) =>{
       console.log("send successful")
-      console.log(d);
-
+      //console.log(d);
     })
     .catch((e) => {
         console.error(e);
     });  
-    setLoading(false);      
-   
+    
+    params = await algodclient.getTransactionParams().do();  
+    let txn2 = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+      assetIndex: dethID,
+      from: receiver, 
+      to: sessionStorage.getItem('address'), 
+      amount: amount,
+      type:  'axfer',  // ASA Transfer
+      suggestedParams: params
+    });
+    let signed = txn2.signTxn(dethAccount.sk)    
+    let tx = await algodclient.sendRawTransaction(signed).do();
+    console.log("Transaction : " + tx.txId);
+    // Wait for transaction to be confirmed
+    let confirmedTxn = await algosdk.waitForConfirmation(algodclient, tx.txId, 2);
+    //Get the completed Transaction
+    console.log("Transaction " + tx.txId + " confirmed in round " + confirmedTxn["confirmed-round"]);
+    
   }
 
   /* Checking Wallet Balance */
@@ -173,7 +189,7 @@ function App() {
     
     const indexerClient = new algosdk.Indexer(token, baseServer, port);
     
-    let address = "JTCQW5TV5OY5HIX6O7ER5LKIC74UJYU2ORYDRHYXRGGVOJJK4ALDUZSMXI";
+    let address = "FXAHTSPWE3LR4JDEE5RUCZF2LF44VBVXVFC3UUQGDZQEQVIZW4PHJ7QDXA";
     let response = await indexerClient.lookupAccountAssets(address).do();
     let algAmount;
     response.assets.forEach((asset) => {
@@ -182,7 +198,28 @@ function App() {
         //console.log(algAmount)
       }
     })
-    window.document.getElementById('algoWallet').innerHTML = "Algorand Wallet (Community):<br/>" + String(algAmount).substring(0,8) + " ALGO";
+    window.document.getElementById('algoWallet').innerHTML = "Algorand Community Pool:<br/>" + String(algAmount).substring(0,8) + " wETH";
+    
+    if(loggedIn){
+      let response = await indexerClient.lookupAccountAssets(sessionStorage.getItem('address')).do();
+      let wethAmount, stakedWethAmount,depWethAmount;
+      response.assets.forEach((asset) => {
+        if(asset['asset-id']===90650110){
+          wethAmount = asset['amount'] * 10**-8
+          window.document.getElementById('wethAvail').innerHTML = "Available wETH:<br/>" + String(wethAmount).substring(0,8) + " wETH";
+        }
+        if(asset['asset-id']===91208322){
+          //console.log(asset);
+          stakedWethAmount = asset['amount'] * 10**-8
+          window.document.getElementById('stWethBal').innerHTML = "Your Staked Ethereum:<br/>" + String(stakedWethAmount).substring(0,8) + " stETH";
+        }
+        if(asset['asset-id']===91208285){
+          depWethAmount = asset['amount'] * 10**-8
+          window.document.getElementById('depWeth').innerHTML = "Deposited wETH:<br/>" + String(depWethAmount).substring(0,8) + " wETH";
+        }
+      })
+    }
+    
     return algAmount;
 
   }
@@ -192,24 +229,23 @@ function App() {
     const Web3 = require('web3');
     const web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/e8dcbee341124f3884d296c775de27fa"))
     
-    let tokenAddress = "0xc778417E063141139Fce010982780140Aa0cD5Ab";
+    let tokenAddress = "0x88b9e8a6211466af42b1d92402d4075de6cf2ffe";
     let walletAddress = "0x7F36B39c2e1bCc4Ec135832e21eCF082A6EC7e77";
 
-    // The minimum ABI to get ERC20 Token balance
-    let minABI = [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"guy","type":"address"},{"name":"wad","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"dst","type":"address"},{"name":"wad","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"wad","type":"uint256"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"dst","type":"address"},{"name":"wad","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"deposit","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"src","type":"address"},{"indexed":true,"name":"guy","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"src","type":"address"},{"indexed":true,"name":"dst","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"dst","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Deposit","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"src","type":"address"},{"indexed":false,"name":"wad","type":"uint256"}],"name":"Withdrawal","type":"event"}];
+    let minABI = [{"inputs":[{"internalType":"address","name":"_lidoContract","type":"address"},{"internalType":"address","name":"_wethContract","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"checkStEthBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"checkWrappedETHBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"receiveEther","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"stake","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"transferAndStakeWrappedEth","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"unwrap","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"wrap","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}];
     let contract = new web3.eth.Contract(minABI,tokenAddress);
-    let balance = await contract.methods.balanceOf(walletAddress).call();
+    let balance = await contract.methods.checkStEthBalance().call();
+    
     //console.log(web3.utils.fromWei(balance, "ether") + " ETH");
     //console.log(balance);
-    window.document.getElementById('ethWallet').innerHTML = "Staked Ethereum (Community):<br/>" + web3.utils.fromWei(balance, "ether") + " stETH";
+    window.document.getElementById('ethWallet').innerHTML = "Staked Ethereum Community Pool:<br/>" + web3.utils.fromWei(balance, "ether").substring(0,8) + " stETH";
    
-        
   }
   getEthBalance();
   setInterval(getEthBalance, 10000);
   
-
-
+  /*****/
+  
   return (
     <Container>
       <Container style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
@@ -222,27 +258,33 @@ function App() {
 
       <Container>
         <Container style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
-          <Header as="p" id="algoWallet" content="Algorand Wallet (Community): " style={{ marginTop: '2em', marginBottom: '0.5em' }}/>
-          <Header as="p" id="ethWallet" content="Staked Ethereum (Community): " style={{ textAlign: 'right',marginTop: '2em', marginBottom: '0.5em' }}/>
+          <Header as="p" id="algoWallet" content="Algorand Community Pool: " style={{ marginTop: '2em', marginBottom: '0.5em' }}/>
+          <Header as="p" id="ethWallet" content="Staked Ethereum Community Pool: " style={{ textAlign: 'right',marginTop: '2em', marginBottom: '0.5em' }}/>
         </Container>
+        
+
         <Container style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
-          <Header as="p" id="algoBal" content="Unstaked Algorand Balance: " style={{ marginTop: '0.5em', marginBottom: '0.5em' }}/>
-          <Header as="p" id="wethBal" content="Unstaked Wrapped Ethereum: " style={{ textAlign: 'right',marginTop: '0.5em', marginBottom: '0.5em' }}/>
+          <Header as="p" id="depWeth" content="Deposited wETH: " style={{marginTop: '0.5em', marginBottom: '0.5em' }}/>
+          <Header as="p" id="stWethBal" content="Your Staked Ethereum: " style={{ textAlign: 'right',marginTop: '0.5em', marginBottom: '0.5em' }}/>
+        
         </Container>
-       
-        <Container style={{display:'flex', flexDirection:'row', justifyContent:'flex-end'}}>
-          <Header as="p" id="stWethBal" content="Staked Wrapped Ethereum: " style={{ textAlign: 'right',marginTop: '0.5em', marginBottom: '0.5em' }}/>
+
+        <Container style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
+          <Header as="p" id="wethAvail" content="Available wETH: " style={{ textAlign: 'right',marginTop: '0.5em', marginBottom: '0.5em' }}/>
         </Container>
     </Container>
-        <Container style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>      
+        <Container style={{display:'flex', flexDirection:'column', justifyContent:'space-between'}}>      
+          
+          
+          <Input id="algoIn" label="ALGO" style={{marginTop: '2em',marginBottom:'0.5em'}}></Input>
           <Button onClick={handleSendAlgo} style={{color:'white',backgroundColor: 'steelblue', height:'50px', margin:'auto 0'}}> 
             Convert ALGO to wETH 
           </Button>
-          <Button onClick={handleSendWeth} style={{marginLeft:'10px',color:'white',backgroundColor: 'steelblue', height:'50px'}}>
+          <Input id="wethIn" label="wETH" style={{marginTop:'0.5em'}}></Input>
+          <Button onClick={handleSendWeth} style={{marginTop:'10px',color:'white',backgroundColor: 'steelblue', height:'50px'}}>
             Stake wETH
           </Button>
         </Container>
-      
       
     </Container>
   );
