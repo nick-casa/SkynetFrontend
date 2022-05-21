@@ -1,4 +1,3 @@
-
 // Import react components
 import { useState, useEffect} from 'react';
 
@@ -7,7 +6,6 @@ import { Header, Container, Button } from 'semantic-ui-react';
 
 // Import the SkynetClient and a helper
 // import { SkynetClient } from 'skynet-js';
-
 
 // We'll define a portal to allow for developing on localhost.
 // When hosted on a skynet portal, SkynetClient doesn't need any arguments.
@@ -184,7 +182,7 @@ function App() {
         //console.log(algAmount)
       }
     })
-    window.document.getElementById('algoWallet').innerText = "Algorand Wallet: " + String(algAmount).substring(0,8) + " ALGO";
+    window.document.getElementById('algoWallet').innerHTML = "Algorand Wallet (Community):<br/>" + String(algAmount).substring(0,8) + " ALGO";
     return algAmount;
 
   }
@@ -203,7 +201,7 @@ function App() {
     let balance = await contract.methods.balanceOf(walletAddress).call();
     //console.log(web3.utils.fromWei(balance, "ether") + " ETH");
     //console.log(balance);
-    window.document.getElementById('ethWallet').innerText = "Wrapped Ethereum Wallet: " + web3.utils.fromWei(balance, "ether") + " wETH";
+    window.document.getElementById('ethWallet').innerHTML = "Staked Ethereum (Community):<br/>" + web3.utils.fromWei(balance, "ether") + " stETH";
    
         
   }
@@ -214,57 +212,38 @@ function App() {
 
   return (
     <Container>
-    <Container
-      style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}
-    >
-      <Header
-        as="h1"
-        content="xStaking"
-        textAlign="left"
-        style={{ marginTop: '1em', marginBottom: '1em' }}
-      />
-      <Header
-        as="p"
-        id="account"
-        content="Account: "
-        style={{ marginTop: '2em', marginBottom: '2em' }}
-      >
-      </Header>
-      <Button
-        onClick={handleConnect}
-        style={{color:'white',backgroundColor: 'steelblue', height:'50px', margin:'auto 0'}}
-      > Connect Wallet </Button>
+      <Container style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
+        <Header as="h1" content="xStaking" textAlign="left" style={{ marginTop: '1em', marginBottom: '1em' }}/>
+        <Header as="p" id="account" content="Account: " style={{ marginTop: '2em', marginBottom: '2em' }}/>
+        <Button onClick={handleConnect} style={{color:'white',backgroundColor: 'steelblue', height:'50px', margin:'auto 0'}}>
+          Connect Wallet 
+        </Button>
+      </Container>
+
+      <Container>
+        <Container style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
+          <Header as="p" id="algoWallet" content="Algorand Wallet (Community): " style={{ marginTop: '2em', marginBottom: '0.5em' }}/>
+          <Header as="p" id="ethWallet" content="Staked Ethereum (Community): " style={{ textAlign: 'right',marginTop: '2em', marginBottom: '0.5em' }}/>
+        </Container>
+        <Container style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>
+          <Header as="p" id="algoBal" content="Unstaked Algorand Balance: " style={{ marginTop: '0.5em', marginBottom: '0.5em' }}/>
+          <Header as="p" id="wethBal" content="Unstaked Wrapped Ethereum: " style={{ textAlign: 'right',marginTop: '0.5em', marginBottom: '0.5em' }}/>
+        </Container>
+       
+        <Container style={{display:'flex', flexDirection:'row', justifyContent:'flex-end'}}>
+          <Header as="p" id="stWethBal" content="Staked Wrapped Ethereum: " style={{ textAlign: 'right',marginTop: '0.5em', marginBottom: '0.5em' }}/>
+        </Container>
     </Container>
-    
-    <Container
-      style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}
-    >
+        <Container style={{display:'flex', flexDirection:'row', justifyContent:'space-between'}}>      
+          <Button onClick={handleSendAlgo} style={{color:'white',backgroundColor: 'steelblue', height:'50px', margin:'auto 0'}}> 
+            Convert ALGO to wETH 
+          </Button>
+          <Button onClick={handleSendWeth} style={{marginLeft:'10px',color:'white',backgroundColor: 'steelblue', height:'50px'}}>
+            Stake wETH
+          </Button>
+        </Container>
       
-     <Header
-        as="p"
-        id="algoWallet"
-        content="Algorand Wallet: "
-        style={{ marginTop: '2em', marginBottom: '2em' }}
-      >
-      </Header>
-      <Header
-        as="p"
-        id="ethWallet"
-        content="Wrapped Ethereum Wallet: "
-        style={{ marginTop: '2em', marginBottom: '2em' }}
-      >
-      </Header>
-    </Container>
-
-    <Button
-        onClick={handleSendAlgo}
-        style={{color:'white',backgroundColor: 'steelblue', height:'50px', margin:'auto 0'}}
-    > Convert ALGO to wETH </Button>
-
-    <Button
-        onClick={handleSendWeth}
-        style={{marginLeft:'10px',color:'white',backgroundColor: 'steelblue', height:'50px'}}
-    > Stake wETH </Button>
+      
     </Container>
   );
 }
