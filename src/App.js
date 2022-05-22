@@ -299,6 +299,7 @@ function App() {
         </Container>
       </Container>
       <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+
         <Input id="wethIn" label="wETH" style={{ marginTop: '0.5em' }}></Input>
         <Button onClick={handleSendWeth} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
           Stake wETH
