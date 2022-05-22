@@ -208,7 +208,7 @@ function App() {
       response.assets.forEach((asset) => {
         if (asset['asset-id'] === 90650110) {
           wethAmount = asset['amount'] * 10 ** -8
-          window.document.getElementById('wethAvail').innerHTML = "Available wETH:<br/>" + String(wethAmount).substring(0, 8) + " wETH";
+          window.document.getElementById('wethAvail').innerHTML = "Your wETH balance:<br/>" + String(wethAmount).substring(0, 8) + " wETH";
         }
         if (asset['asset-id'] === 91208322) {
           //console.log(asset);
@@ -217,7 +217,7 @@ function App() {
         }
         if (asset['asset-id'] === 91208285) {
           depWethAmount = asset['amount'] * 10 ** -8
-          window.document.getElementById('depWeth').innerHTML = "Your Staged wETH<br/>" + String(depWethAmount).substring(0, 8) + " wETH";
+          window.document.getElementById('depWeth').innerHTML = "Your Staged wETH:<br/>" + String(depWethAmount).substring(0, 8) + " wETH";
         }
       })
     }
@@ -327,17 +327,21 @@ function App() {
 
 
         <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Header as="p" id="depWeth" content="Your Staged wETH " style={{ marginTop: '0.5em', marginBottom: '0.5em' }} />
+          <Header as="p" id="depWeth" content="Your Staged wETH: " style={{ marginTop: '0.5em', marginBottom: '0.5em' }} />
           <Header as="p" id="stWethBal" content="Your Staked Ethereum (as stETH_LP): " style={{ textAlign: 'right', marginTop: '0.5em', marginBottom: '0.5em' }} />
 
         </Container>
 
         <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Header as="p" id="wethAvail" content="Your wETH balance: " style={{ textAlign: 'right', marginTop: '0.5em', marginBottom: '0.5em' }} />
+          <Header as="p" id="wethAvail" content="Your wETH balance: " style={{ textAlign: 'left', marginTop: '0.5em', marginBottom: '0.5em' }} />
         </Container>
       </Container>
       <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
 
+<Input id="algoIn" label="ALGO" style={{ marginTop: '2em', marginBottom: '0.5em' }}></Input>
+        <Button onClick={handleSendAlgo} style={{ color: 'white', backgroundColor: 'steelblue', height: '50px', margin: 'auto 0' }}>
+          Convert ALGO to wETH
+        </Button>
         <Input id="wethIn" label="wETH" style={{ marginTop: '0.5em' }}></Input>
         <Button onClick={handleSendWeth} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
           Stake wETH
@@ -370,11 +374,3 @@ function App() {
 
 export default App;
 
-/*
-
-<Input id="algoIn" label="ALGO" style={{ marginTop: '2em', marginBottom: '0.5em' }}></Input>
-        <Button onClick={handleSendAlgo} style={{ color: 'white', backgroundColor: 'steelblue', height: '50px', margin: 'auto 0' }}>
-          Convert ALGO to wETH
-        </Button>
-
-*/
