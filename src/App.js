@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 // Import UI Components
 import { Header, Container, Button, Input } from 'semantic-ui-react';
 
+import { createClient } from 'urql';
+
 // Import the SkynetClient and a helper
 // import { SkynetClient } from 'skynet-js';
 
@@ -198,7 +200,7 @@ function App() {
         //console.log(algAmount)
       }
     })
-    window.document.getElementById('algoWallet').innerHTML = "Algorand Community Pool:<br/>" + String(algAmount).substring(0, 8) + " wETH";
+    window.document.getElementById('algoWallet').innerHTML = "Algorand wETH Staging Pool:<br/>" + String(algAmount).substring(0, 8) + " wETH";
 
     if (loggedIn) {
       let response = await indexerClient.lookupAccountAssets(sessionStorage.getItem('address')).do();
@@ -211,11 +213,11 @@ function App() {
         if (asset['asset-id'] === 91208322) {
           //console.log(asset);
           stakedWethAmount = asset['amount'] * 10 ** -8
-          window.document.getElementById('stWethBal').innerHTML = "Your Staked Ethereum:<br/>" + String(stakedWethAmount).substring(0, 8) + " stETH";
+          window.document.getElementById('stWethBal').innerHTML = "Your Staked Ethereum (as stETH_LP):<br/>" + String(stakedWethAmount).substring(0, 8) + " stETH";
         }
         if (asset['asset-id'] === 91208285) {
           depWethAmount = asset['amount'] * 10 ** -8
-          window.document.getElementById('depWeth').innerHTML = "Deposited wETH:<br/>" + String(depWethAmount).substring(0, 8) + " wETH";
+          window.document.getElementById('depWeth').innerHTML = "Your Staged wETH<br/>" + String(depWethAmount).substring(0, 8) + " wETH";
         }
       })
     }
@@ -229,8 +231,8 @@ function App() {
     const Web3 = require('web3');
     const web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/e8dcbee341124f3884d296c775de27fa"))
 
-    let tokenAddress = "0x88b9e8a6211466af42b1d92402d4075de6cf2ffe";
-    let walletAddress = "0x7F36B39c2e1bCc4Ec135832e21eCF082A6EC7e77";
+    let tokenAddress = "0x5a09E033863f74E80973491930d067Dc3B8797Cd";
+    let walletAddress = "0xd40EefCFaB888C9159a61221def03bF77773FC19";
 
     let minABI = [{ "inputs": [{ "internalType": "address", "name": "_lidoContract", "type": "address" }, { "internalType": "address", "name": "_wethContract", "type": "address" }], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [], "name": "checkStEthBalance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "checkWrappedETHBalance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "receiveEther", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }], "name": "stake", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "payable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }], "name": "transferAndStakeWrappedEth", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }], "name": "unwrap", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }], "name": "wrap", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "stateMutability": "payable", "type": "receive" }];
     let contract = new web3.eth.Contract(minABI, tokenAddress);
@@ -238,7 +240,7 @@ function App() {
 
     //console.log(web3.utils.fromWei(balance, "ether") + " ETH");
     //console.log(balance);
-    window.document.getElementById('ethWallet').innerHTML = "Staked Ethereum Community Pool:<br/>" + web3.utils.fromWei(balance, "ether").substring(0, 8) + " stETH";
+    window.document.getElementById('ethWallet').innerHTML = "Ethereum stETH Pool:<br/>" + web3.utils.fromWei(balance, "ether").substring(0, 8) + " stETH";
 
   }
   getEthBalance();
@@ -270,6 +272,41 @@ function App() {
     console.log(logs);
   }
 
+  const graphing = async (event) => {
+    const APIURL = 'https://api.thegraph.com/subgraphs/name/theothersteven/xstaking'
+    const tokensQuery = `
+    {
+      stEthPools(first: 10) {
+        id
+        cumStaked
+        cumUnwrapped
+        cumWithdrawal
+        Transactions {
+          id
+          time
+          staked
+          withdrawal
+        }
+      }
+    }  
+    `
+    const client = createClient({
+      url: APIURL,
+    })
+    const cumulativeSum = (sum => value => sum += value)(0);
+
+    const data = await client.query(tokensQuery).toPromise()
+    window.document.getElementById("tvlLogs").innerText = data['data']['stEthPools']
+      .map((elem) => {
+        return parseInt(elem['Transactions'][0]['staked']);
+      })
+      .map(cumulativeSum)
+      .reduce(
+        (previousValue, currentValue) => previousValue + (currentValue / 1e18).toString() + " stETH \n", "TVL\n"
+      );
+  }
+
+
   /*****/
 
   return (
@@ -284,18 +321,19 @@ function App() {
 
       <Container>
         <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Header as="p" id="algoWallet" content="Algorand Community Pool: " style={{ marginTop: '2em', marginBottom: '0.5em' }} />
-          <Header as="p" id="ethWallet" content="Staked Ethereum Community Pool: " style={{ textAlign: 'right', marginTop: '2em', marginBottom: '0.5em' }} />
+          <Header as="p" id="algoWallet" content="Algorand wETH Staging Pool: " style={{ marginTop: '2em', marginBottom: '0.5em' }} />
+          <Header as="p" id="ethWallet" content="Ethereum stETH Pool: " style={{ textAlign: 'right', marginTop: '2em', marginBottom: '0.5em' }} />
         </Container>
 
 
         <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Header as="p" id="depWeth" content="Deposited wETH: " style={{ marginTop: '0.5em', marginBottom: '0.5em' }} />
-          <Header as="p" id="stWethBal" content="Your Staked Ethereum: " style={{ textAlign: 'right', marginTop: '0.5em', marginBottom: '0.5em' }} />
+          <Header as="p" id="depWeth" content="Your Staged wETH " style={{ marginTop: '0.5em', marginBottom: '0.5em' }} />
+          <Header as="p" id="stWethBal" content="Your Staked Ethereum (as stETH_LP): " style={{ textAlign: 'right', marginTop: '0.5em', marginBottom: '0.5em' }} />
+
         </Container>
 
         <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Header as="p" id="wethAvail" content="Available wETH: " style={{ textAlign: 'right', marginTop: '0.5em', marginBottom: '0.5em' }} />
+          <Header as="p" id="wethAvail" content="Your wETH balance: " style={{ textAlign: 'right', marginTop: '0.5em', marginBottom: '0.5em' }} />
         </Container>
       </Container>
       <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -308,11 +346,20 @@ function App() {
 
       <Container style={{ display: 'flex', flexDirection: 'column', marginTop: "20px" }}>
 
+        <Button onClick={graphing} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
+          Get Staked TVL
+        </Button>
+        <Header as="p" id="tvlLogs" style={{ backgroundColor: "#efefef", borderRadius: "12px", padding: "20px", fontSize: "12px" }} />
+
+      </Container>
+
+      <Container style={{ display: 'flex', flexDirection: 'column', marginTop: "20px" }}>
+
         <Button onClick={displayLogs} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
           Show Recent Transactions
         </Button>
         <Header as="p" id="transactionLogs" style={{ backgroundColor: "#efefef", borderRadius: "12px", padding: "20px", fontSize: "12px" }}>
-          test
+
         </Header>
 
       </Container>
