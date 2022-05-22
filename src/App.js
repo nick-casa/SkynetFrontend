@@ -292,7 +292,6 @@ function App() {
         <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
           <Header as="p" id="depWeth" content="Deposited wETH: " style={{ marginTop: '0.5em', marginBottom: '0.5em' }} />
           <Header as="p" id="stWethBal" content="Your Staked Ethereum: " style={{ textAlign: 'right', marginTop: '0.5em', marginBottom: '0.5em' }} />
-
         </Container>
 
         <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -300,12 +299,6 @@ function App() {
         </Container>
       </Container>
       <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-
-
-        <Input id="algoIn" label="ALGO" style={{ marginTop: '2em', marginBottom: '0.5em' }}></Input>
-        <Button onClick={handleSendAlgo} style={{ color: 'white', backgroundColor: 'steelblue', height: '50px', margin: 'auto 0' }}>
-          Convert ALGO to wETH
-        </Button>
         <Input id="wethIn" label="wETH" style={{ marginTop: '0.5em' }}></Input>
         <Button onClick={handleSendWeth} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
           Stake wETH
@@ -328,3 +321,12 @@ function App() {
 }
 
 export default App;
+
+/*
+
+<Input id="algoIn" label="ALGO" style={{ marginTop: '2em', marginBottom: '0.5em' }}></Input>
+        <Button onClick={handleSendAlgo} style={{ color: 'white', backgroundColor: 'steelblue', height: '50px', margin: 'auto 0' }}>
+          Convert ALGO to wETH
+        </Button>
+
+*/
