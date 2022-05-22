@@ -300,14 +300,17 @@ function App() {
     const cumulativeSum = (sum => value => sum += value)(0);
 
     const data = await client.query(tokensQuery).toPromise()
-    window.document.getElementById("tvlLogs").innerText = data['data']['stEthPools']
-      .map((elem) => {
-        return parseInt(elem['Transactions'][0]['staked']);
-      })
-      .map(cumulativeSum)
-      .reduce(
-        (previousValue, currentValue) => previousValue + (currentValue / 1e18).toString() + " stETH \n", "TVL\n"
-      );
+    window.document.getElementById("tvlLogs").innerText =
+     data['data']['stEthPools']
+       .map((elem) => {
+         return elem['Transactions'].map((elem2) => parseInt(elem2['staked']));
+       })
+       .flat()
+       .map(cumulativeSum)
+       .reduce(
+         (previousValue, currentValue) => previousValue + (currentValue / 1e18).toString() + " stETH \n", "TVL\n"
+       )
+
   }
 
 
