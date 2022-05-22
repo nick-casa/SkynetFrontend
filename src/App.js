@@ -1,3 +1,7 @@
+//C3 Integrations
+//import { C3RequestOp, C3Sdk, CEDepositRequest, connectC3 } from "c3-sdk/src/C3Sdk"
+//import { Signer } from "c3-sdk/src/Signer.ts"
+
 // Import react components
 import { useState, useEffect } from 'react';
 
