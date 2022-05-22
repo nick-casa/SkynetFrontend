@@ -15,7 +15,7 @@ jobs:
           node-version: 16.x
 
       - run: yarn
-      - run: npm install
+      - run: process.env.CI=false
       - run: yarn build
       
 
