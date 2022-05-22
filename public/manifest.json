@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "xStaking",
+  "name": "A simple cross-chain staking solution",
   "icons": [
     {
       "src": "favicon.ico",
@@ -21,5 +21,6 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "skylink":"CACzOBeS5TDV_eKvqFT9qdmo2FQOWLGfR_A25e-sNtPxTA"
 }
