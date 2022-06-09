@@ -318,7 +318,7 @@ function App() {
 
   return (
     <Container>
-      <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+      <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
         <Header as="h1" content="xStaking" textAlign="left" style={{ marginTop: '1em', marginBottom: '1em' }} />
         <Header as="p" id="account" content="Account: " style={{ marginTop: '2em', marginBottom: '2em' }} />
         <Button onClick={handleConnect} style={{ color: 'white', backgroundColor: 'steelblue', height: '50px', margin: 'auto 0' }}>
@@ -326,10 +326,10 @@ function App() {
         </Button>
       </Container>
 
-      <Container>
+      <Container style={{ border: '2px dashed #D3D3D3', borderRadius: '20px', padding:'30px' }}>
         <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Header as="p" id="algoWallet" content="Algorand wETH Staging Pool: " style={{ marginTop: '2em', marginBottom: '0.5em' }} />
-          <Header as="p" id="ethWallet" content="Ethereum stETH Pool: " style={{ textAlign: 'right', marginTop: '2em', marginBottom: '0.5em' }} />
+          <Header as="p" id="algoWallet" content="Algorand wETH Staging Pool: " style={{ marginTop: '0.5em', marginBottom: '0.5em' }} />
+          <Header as="p" id="ethWallet" content="Ethereum stETH Pool: " style={{ textAlign: 'right', marginTop: '0.5em', marginBottom: '0.5em' }} />
         </Container>
 
 
@@ -342,39 +342,45 @@ function App() {
         <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
           <Header as="p" id="wethAvail" content="Your wETH balance: " style={{ textAlign: 'left', marginTop: '0.5em', marginBottom: '0.5em' }} />
         </Container>
-      </Container>
-      <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-
-<Input id="algoIn" label="ALGO" style={{ marginTop: '2em', marginBottom: '0.5em' }}></Input>
-        <Button onClick={handleSendAlgo} style={{ color: 'white', backgroundColor: 'steelblue', height: '50px', margin: 'auto 0' }}>
-          Convert ALGO to wETH
-        </Button>
-        <Input id="wethIn" label="wETH" style={{ marginTop: '0.5em' }}></Input>
-        <Button onClick={handleSendWeth} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
-          Stake wETH
-        </Button>
-      </Container>
-
-      <Container style={{ display: 'flex', flexDirection: 'column', marginTop: "20px" }}>
-
-        <Button onClick={graphing} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
-          Get Staked TVL
-        </Button>
-        <Header as="p" id="tvlLogs" style={{ backgroundColor: "#efefef", borderRadius: "12px", padding: "20px", fontSize: "12px" }} />
+        <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <Input id="wethIn" label="wETH" style={{ marginTop: '0.5em' }}></Input>
+          <Button onClick={handleSendWeth} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
+            Stake wETH
+          </Button>
+        </Container>
 
       </Container>
+      <Container style={{ border: '2px dashed #D3D3D3', borderRadius: '20px', padding:'30px', marginTop:'10px' }}>
+        <Container style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <Header as="h3">Only have Algos? Convert ALGO to wETH</Header> 
+          <Input id="algoIn" label="ALGO" style={{ marginTop: '0.5em', marginBottom: '0.5em' }}></Input>
+          <Button onClick={handleSendAlgo} style={{ color: 'white', backgroundColor: 'steelblue', height: '50px', margin: 'auto 0' }}>
+            Convert ALGO to wETH
+          </Button>
+        </Container>
+      </Container>
+      <Container style={{ border: '2px dashed #D3D3D3', borderRadius: '20px', padding:'30px', marginTop:'10px' }}>
+        <Header as="h3">Stats</Header> 
 
-      <Container style={{ display: 'flex', flexDirection: 'column', marginTop: "20px" }}>
+        <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
 
-        <Button onClick={displayLogs} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
-          Show Recent Transactions
-        </Button>
-        <Header as="p" id="transactionLogs" style={{ backgroundColor: "#efefef", borderRadius: "12px", padding: "20px", fontSize: "12px" }}>
+          <Container style={{ display: 'flex', flexDirection: 'column', paddingRight: '10px' }}>
+            <Button onClick={graphing} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
+              Get Staked TVL
+            </Button>
+            <Header as="p" id="tvlLogs" style={{ backgroundColor: "#efefef", borderRadius: "12px", padding: "20px", fontSize: "12px" }} />
+          </Container>
 
-        </Header>
+          <Container style={{ display: 'flex', flexDirection: 'column', paddingLeft: "10px" }}>
+            <Button onClick={displayLogs} style={{ marginTop: '10px', color: 'white', backgroundColor: 'steelblue', height: '50px' }}>
+              Show Recent Transactions
+            </Button>
+            <Header as="p" id="transactionLogs" style={{ backgroundColor: "#efefef", borderRadius: "12px", padding: "20px", fontSize: "12px" }}>
+            </Header>
+          </Container>
+        </Container>
 
       </Container>
-
     </Container>
   );
 }
