@@ -233,7 +233,7 @@ function App() {
   setInterval(getAlgoBalance, 1000);
   const getEthBalance = async (event) => {
     const Web3 = require('web3');
-    const web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/e8dcbee341124f3884d296c775de27fa"))
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/b338e829aff844ab9113f2e52f13984b"))
 
     let tokenAddress = "0x5a09E033863f74E80973491930d067Dc3B8797Cd";
     let walletAddress = "0xd40EefCFaB888C9159a61221def03bF77773FC19";
